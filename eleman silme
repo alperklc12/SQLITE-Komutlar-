@@ -1,0 +1,6 @@
+def delete_person(per_id):
+    conn = sqlite3.connect(data_)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM persons WHERE person_id=?", (per_id,))
+    conn.commit()
+    conn.close()
