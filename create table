@@ -1,0 +1,9 @@
+def create_data_file():
+    full_path = os.getcwd()
+    relativ_path = full_path + '\\' + books_file
+
+    if not os.path.isfile(relativ_path):
+        connect = sqlite3.connect(books_file)
+        cursor = connect.cursor()
+        cursor.execute('CREATE TABLE books(name text, author text, read integer)')
+        connect.close()
