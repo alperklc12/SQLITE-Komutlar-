@@ -1,0 +1,99 @@
+import sqlite3
+
+
+class Book:
+    def __init__(self, name, author, released):
+        self.name = name
+        self.author = author
+        self.released = released
+
+    def __str__(self):
+        return f'{self.name} by {self.author}, {self.released}'
+
+
+class Bookshelf:
+    def __init__(self):
+        self.connect_fn()
+
+    def connect_fn(self):
+        self.connect_ = sqlite3.connect('data.db')
+        self.cursor_ = self.connect_.cursor()
+
+        query = 'CREATE TABLE IF NOT EXISTS books (name TEXT, author TEXT, released INTEGER)'
+        self.cursor_.execute(query)
+        self.connect_.commit()
+
+    def display_books_fn(self):
+        query = 'SELECT * FROM books'
+        self.cursor_.execute(query)
+        books = self.cursor_.fetchall()
+
+        if len(books) == 0:
+            print('No book')
+        else:
+            for i in books:
+                book = Book(i[0], i[1], i[2])
+                print(book)
+
+    def query_book_fn(self, name):
+        query = 'SELECT * FROM books WHERE name=?'
+        self.cursor_.execute(query, (name,))
+        current_book = self.cursor_.fetchall()
+        if len(current_book) == 0:
+            print('No book')
+        else:
+            book = Book(current_book[0][0], current_book[0][1], current_book[0][2])
+            print(book)
+
+    def add_book_fn(self, book):
+        query = 'INSERT INTO books VALUES(?, ?, ?)'
+        self.cursor_.execute(query, (book.name, book.author, book.released))
+        self.connect_.commit()
+
+    def delete_book_fn(self, name):
+        query = 'DELETE FROM books WHERE name=?'
+        self.cursor_.execute(query, (name,))
+        self.connect_.commit()
+
+    def upgrade_released_fn(self, name):
+        query = 'SELECT released FROM books WHERE name = ?'
+        self.cursor_.execute(query, (name,))
+        released_ = self.cursor_.fetchall()[0]
+        released_ += 1
+        query = 'UPDATE books SET released = ? WHERE name = ?'
+        self.cursor_.execute(query, (released_, name))
+        self.connect_.commit()
+        
+        ************************
+        
+        from app import *
+
+CHOICE_MENU = '[d]Display [s]Query [a]Add [x]Del [u]Upgrade [q]Exit'
+
+books = Bookshelf()
+
+while True:
+    cmd = input(CHOICE_MENU)
+    if cmd == 'q':
+        books.connect_.close()
+        break
+    elif cmd == 'd':
+        books.display_books_fn()
+    elif cmd == 's':
+        name = input('Book name')
+        books.query_book_fn(name)
+    elif cmd == 'a':
+        name = input('Book name')
+        author = input('Author name')
+        released = int(input('Year'))
+        book = Book(name, author, released)
+        books.add_book_fn(book)
+    elif cmd == 'u':
+        name = input('Book name')
+        books.upgrade_released_fn(name)
+    elif cmd == 'x':
+        name = input('Book name')
+        books.delete_book_fn(name)
+
+    else:
+        print('Wrong entry')
