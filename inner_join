@@ -1,0 +1,5 @@
+SELECT s.name, l.name 
+FROM schooldb.student as s 
+INNER JOIN schooldb.student_lesson as sl ON s.id=sl.studentid 
+INNER JOIN schooldb.lesson as l ON l.id=sl.lessonid
+WHERE s.name="tolga"
